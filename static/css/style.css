@@ -1,0 +1,108 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 20px;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding-top: 30px;
+    min-height: 70px;
+    border-bottom: #0779e4 3px solid;
+}
+
+header a {
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 16px;
+}
+
+header ul {
+    padding: 0;
+    list-style: none;
+}
+
+header li {
+    display: inline;
+    padding: 0 20px 0 20px;
+}
+
+header #branding {
+    float: left;
+}
+
+header #branding h1 {
+    margin: 0;
+}
+
+header nav {
+    float: right;
+    margin-top: 10px;
+}
+
+header .highlight, header .current a {
+    color: #0779e4;
+    font-weight: bold;
+}
+
+header a:hover {
+    color: #ccc;
+    font-weight: bold;
+}
+
+#interests-form {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+#interests-form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#interests-form button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: #0779e4;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+#interests-form button:hover {
+    background: #0056b3;
+}
+
+#podcasts {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.podcast-item {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.podcast-item:last-child {
+    border-bottom: none;
+}
+
+.podcast-item audio {
+    width: 100%;
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Daily Personalized Podcast Generator</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1><span class="highlight">Daily</span> Podcast Generator</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li class="current"><a href="/dashboard">Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Your Dashboard</h1>
+        <form id="interests-form">
+            <label for="interests">Your Interests (comma-separated):</label>
+            <input type="text" id="interests" name="interests" required>
+            <button type="submit">Update Interests</button>
+        </form>
+
+        <button id="generate-podcast">Generate Today's Podcast</button>
+
+        <div id="podcasts">
+            <h2>Your Podcasts</h2>
+            <div id="podcasts-list"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
