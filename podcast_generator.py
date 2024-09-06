@@ -1,5 +1,6 @@
 import os
 import requests
+from datetime import date
 from config import Config
 from web_scraper import get_website_text_content
 from anthropic_chat_completion.chat_request import send_chat_request
@@ -23,29 +24,41 @@ def search_articles(query: str, num_results: int = 5):
     payload = {
         "query": query,
         "num_results": num_results,
-        "start_published_date": "2023-01-01"
+        "start_published_date": date.today().strftime("%Y-%m-%d")
     }
-    response = requests.post(url, json=payload, headers=headers)
-    print("Full Exa API response:")
-    print(response.json())
-    print('=' * 50)
-    return response.json().get('results', [])
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()
+        print("Full Exa API response:")
+        print(response.json())
+        print('=' * 50)
+        return response.json().get('results', [])
+    except requests.RequestException as e:
+        print(f"Error searching articles: {str(e)}")
+        return []
 
 def filter_relevant_links(articles: list, user_description: str) -> list:
     if not articles:
         return []
-    prompt = f"Given the user description: '{user_description}', filter and rank the following articles by relevance. Return only the URLs of the top 3 most relevant articles:\n\n"
+    prompt = f"Given the user description: '{user_description}', filter and rank the following articles by relevance. Return only the IDs and URLs of the top 3 most relevant articles:\n\n"
     for article in articles:
-        prompt += f"Title: {article.get('title', 'No title')}\nURL: {article.get('url', 'No URL')}\nSnippet: {article.get('snippet', 'No snippet available')}\n\n"
+        prompt += f"ID: {article.get('id', 'No ID')}\nURL: {article.get('url', 'No URL')}\nTitle: {article.get('title', 'No Title')}\n\n"
     
     response = send_chat_request(prompt)
-    relevant_urls = [url.strip() for url in response.split('\n') if url.strip().startswith('http')]
-    return relevant_urls[:3]
+    relevant_articles = []
+    for line in response.split('\n'):
+        if line.startswith('ID:'):
+            article_id = line.split(': ')[1].strip()
+            url_line = next((l for l in response.split('\n') if l.startswith('URL:')), None)
+            if url_line:
+                url = url_line.split(': ')[1].strip()
+                relevant_articles.append({'id': article_id, 'url': url})
+    return relevant_articles[:3]
 
 def summarize_content(content: str) -> str:
     if not content.strip():
         return "We apologize, but we couldn't find any relevant content for today's podcast. Please check back tomorrow for new updates!"
-    prompt = f"Summarize the following content into a short podcast script:\n\n{content}"
+    prompt = f"Summarize the following content into a short podcast script, focusing on the latest tech gadgets and sports news:\n\n{content}"
     return send_chat_request(prompt)
 
 def text_to_speech(text: str) -> str:
@@ -69,23 +82,24 @@ def generate_podcast(user_description: str):
         articles = search_articles(query)
         all_articles.extend(articles)
     
-    relevant_urls = filter_relevant_links(all_articles, user_description)
-    print("\nRelevant URLs:")
-    for url in relevant_urls:
-        print(f"- {url}")
+    relevant_articles = filter_relevant_links(all_articles, user_description)
+    print("\nRelevant articles:")
+    for article in relevant_articles:
+        print(f"- ID: {article['id']}")
+        print(f"  URL: {article['url']}")
     
     content = ""
-    for url in relevant_urls:
+    for article in relevant_articles:
         print('=' * 50)
-        print(f'CRAWLING ARTICLE: {url}')
+        print(f'CRAWLING ARTICLE: {article["url"]}')
         print('=' * 50)
         try:
-            article_content = get_website_text_content(url)
+            article_content = get_website_text_content(article['url'])
             print("Full article content:")
             print(article_content[:500] + "...") # Print first 500 characters
             content += f"{article_content}\n\n"
         except Exception as e:
-            print(f"Error crawling {url}: {str(e)}")
+            print(f"Error crawling {article['url']}: {str(e)}")
 
     print('=' * 50)
     print('SUMMARIZING CONTENT')

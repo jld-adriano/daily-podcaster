@@ -11,7 +11,7 @@ def main():
     try:
         podcast = generate_podcast(user_description)
         print(f'Podcast generated successfully!')
-        print('Transcript:')
+        print('\nTranscript:')
         print(podcast['transcript'])
         print('\nAudio Message:')
         print(podcast['audio_message'])
