@@ -104,6 +104,16 @@ def get_podcasts():
     podcasts = current_user.podcasts.order_by(Podcast.created_at.desc()).all()
     return jsonify([{"id": p.id, "audio_url": p.audio_url, "created_at": p.created_at.isoformat()} for p in podcasts])
 
+@app.route('/api/get_sample_descriptions')
+def get_sample_descriptions():
+    samples = {}
+    user_descriptions_dir = 'user_descriptions'
+    for filename in os.listdir(user_descriptions_dir):
+        if filename.endswith('.txt'):
+            with open(os.path.join(user_descriptions_dir, filename), 'r') as f:
+                samples[filename] = f.read().strip()
+    return jsonify(samples)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

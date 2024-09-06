@@ -6,6 +6,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const interestsForm = document.getElementById('interests-form');
     const generatePodcastBtn = document.getElementById('generate-podcast');
     const podcastsList = document.getElementById('podcasts-list');
+    const sampleDescriptions = document.getElementById('sample-descriptions');
+    const userDescription = document.getElementById('user-description');
+
+    if (sampleDescriptions && userDescription) {
+        // Fetch and populate sample descriptions
+        fetch('/api/get_sample_descriptions')
+            .then(response => response.json())
+            .then(samples => {
+                for (const [filename, content] of Object.entries(samples)) {
+                    const option = document.createElement('option');
+                    option.value = content;
+                    option.textContent = filename;
+                    sampleDescriptions.appendChild(option);
+                }
+            });
+        
+        // Handle sample selection
+        sampleDescriptions.addEventListener('change', function() {
+            userDescription.value = this.value;
+        });
+    }
 
     if (podcastForm) {
         podcastForm.addEventListener('submit', function(e) {

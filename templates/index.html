@@ -12,6 +12,12 @@
             <div id="branding">
                 <h1><span class="highlight">Daily</span> Podcast Generator</h1>
             </div>
+            <nav>
+                <ul>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
@@ -20,6 +26,11 @@
         <p>Generate your personalized daily podcast based on your interests!</p>
         
         <form id="podcast-form">
+            <label for="sample-descriptions">Choose a sample description:</label>
+            <select id="sample-descriptions">
+                <option value="">-- Select a sample --</option>
+            </select>
+            
             <label for="user-description">Describe your interests:</label>
             <textarea id="user-description" name="user-description" required></textarea>
             <button type="submit">Generate Podcast</button>
