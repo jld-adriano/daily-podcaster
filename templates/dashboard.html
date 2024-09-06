@@ -16,16 +16,17 @@
                 <ul>
                     <li><a href="/">Home</a></li>
                     <li class="current"><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/logout">Logout</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <div class="container">
-        <h1>Your Dashboard</h1>
+        <h1>Welcome, {{ current_user.username }}!</h1>
         <form id="interests-form">
             <label for="interests">Your Interests (comma-separated):</label>
-            <input type="text" id="interests" name="interests" required>
+            <input type="text" id="interests" name="interests" value="{{ current_user.interests|join(', ') if current_user.interests else '' }}" required>
             <button type="submit">Update Interests</button>
         </form>
 

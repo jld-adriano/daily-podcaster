@@ -21,23 +21,6 @@ header {
     border-bottom: #0779e4 3px solid;
 }
 
-header a {
-    color: #fff;
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 16px;
-}
-
-header ul {
-    padding: 0;
-    list-style: none;
-}
-
-header li {
-    display: inline;
-    padding: 0 20px 0 20px;
-}
-
 header #branding {
     float: left;
 }
@@ -46,63 +29,62 @@ header #branding h1 {
     margin: 0;
 }
 
-header nav {
-    float: right;
-    margin-top: 10px;
-}
-
-header .highlight, header .current a {
+header .highlight {
     color: #0779e4;
     font-weight: bold;
 }
 
-header a:hover {
-    color: #ccc;
-    font-weight: bold;
-}
-
-#interests-form {
+form {
     background: #fff;
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 5px;
 }
 
-#interests-form input[type="text"] {
+form textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
+    height: 100px;
 }
 
-#interests-form button {
-    display: block;
-    width: 100%;
-    padding: 10px;
+form button {
+    display: inline-block;
+    padding: 10px 20px;
     background: #0779e4;
     color: #fff;
     border: none;
     cursor: pointer;
 }
 
-#interests-form button:hover {
+form button:hover {
     background: #0056b3;
 }
 
-#podcasts {
+#podcast-result {
     background: #fff;
     padding: 20px;
     border-radius: 5px;
+    margin-top: 20px;
 }
 
-.podcast-item {
-    border-bottom: 1px solid #ccc;
-    padding: 10px 0;
-}
-
-.podcast-item:last-child {
-    border-bottom: none;
-}
-
-.podcast-item audio {
+#podcast-player audio {
     width: 100%;
+    margin-bottom: 20px;
+}
+
+#podcast-transcript {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#podcast-result {
+    animation: fadeIn 0.5s ease-in;
 }

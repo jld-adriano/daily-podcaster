@@ -12,19 +12,26 @@
             <div id="branding">
                 <h1><span class="highlight">Daily</span> Podcast Generator</h1>
             </div>
-            <nav>
-                <ul>
-                    <li class="current"><a href="/">Home</a></li>
-                    <li><a href="/dashboard">Dashboard</a></li>
-                </ul>
-            </nav>
         </div>
     </header>
 
     <div class="container">
         <h1>Welcome to Daily Personalized Podcast Generator</h1>
         <p>Generate your personalized daily podcast based on your interests!</p>
-        <a href="/dashboard" class="btn">Go to Dashboard</a>
+        
+        <form id="podcast-form">
+            <label for="user-description">Describe your interests:</label>
+            <textarea id="user-description" name="user-description" required></textarea>
+            <button type="submit">Generate Podcast</button>
+        </form>
+
+        <div id="podcast-result" style="display: none;">
+            <h2>Your Personalized Podcast</h2>
+            <div id="podcast-player"></div>
+            <div id="podcast-transcript"></div>
+        </div>
     </div>
+
+    <script src="/static/js/main.js"></script>
 </body>
 </html>

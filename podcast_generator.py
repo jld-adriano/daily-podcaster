@@ -1,62 +1,20 @@
-import os
-import requests
 import logging
-import time
-from datetime import date, datetime, timedelta
-from email import message_from_file
+from datetime import date
 from config import Config
 from web_scraper import get_website_text_content
 from anthropic_chat_completion.chat_request import send_chat_request
 from text_to_speech import text_to_speech
 
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Simple cache to store API responses
-cache = {}
-CACHE_EXPIRY = timedelta(hours=1)
-
-def process_emails():
-    email_folder = 'emails'
-    email_content = []
-    if not os.path.exists(email_folder):
-        logging.warning(f"{email_folder} directory not found.")
-        return ""
-    
-    for filename in os.listdir(email_folder):
-        if filename.endswith('.eml'):
-            try:
-                with open(os.path.join(email_folder, filename), 'r', encoding='utf-8') as f:
-                    email = message_from_file(f)
-                    subject = email['subject']
-                    body = email.get_payload()
-                    email_content.append(f"Subject: {subject}\nBody: {body}")
-                    logging.info(f"Successfully processed email: {filename}")
-            except Exception as e:
-                logging.error(f"Error processing email {filename}: {str(e)}")
-    
-    if not email_content:
-        logging.warning("No valid emails found in the directory.")
-        return ""
-    
-    combined_content = '\n\n'.join(email_content)
-    logging.info(f"Processed {len(email_content)} emails. Content preview: {combined_content[:100]}...")
-    return combined_content
-
-def generate_queries(user_description: str, email_content: str, num_queries: int = 3) -> list:
-    prompt = f"Based on the following user description and recent email content, generate {num_queries} search queries for finding relevant articles:\n\nUser description: {user_description}\n\nRecent email content:\n{email_content}"
+def generate_queries(user_description: str, num_queries: int = 3) -> list:
+    prompt = f"Based on the following user description, generate {num_queries} search queries for finding relevant articles:\n\nUser description: {user_description}"
     response = send_chat_request(prompt)
     queries = [query.strip() for query in response.split('\n') if query.strip()]
     return queries[:num_queries]
 
 def search_articles(query: str, num_results: int = 10):
     logging.info(f'SEARCHING ARTICLES FOR: {query}')
-    cache_key = f"{query}_{num_results}_{date.today().isoformat()}"
-    
-    if cache_key in cache and datetime.now() - cache[cache_key]['timestamp'] < CACHE_EXPIRY:
-        logging.info("Using cached results")
-        return cache[cache_key]['results']
-    
     url = "https://api.exa.ai/search"
     headers = {
         "accept": "application/json",
@@ -73,8 +31,6 @@ def search_articles(query: str, num_results: int = 10):
         response.raise_for_status()
         results = response.json().get('results', [])
         logging.info(f"Received {len(results)} results from Exa API")
-        logging.info(f"Sample result: {results[0] if results else 'No results'}")
-        cache[cache_key] = {'results': results, 'timestamp': datetime.now()}
         return results
     except requests.RequestException as e:
         logging.error(f"Error searching articles: {str(e)}")
@@ -83,12 +39,11 @@ def search_articles(query: str, num_results: int = 10):
 def filter_relevant_links(articles: list, user_description: str) -> list:
     if not articles:
         return []
-    prompt = f"Given the user description: '{user_description}', who is particularly interested in tech gadgets and sports, filter and rank the following articles by relevance. Return only the IDs and URLs of the top 3 most relevant articles:\n\n"
+    prompt = f"Given the user description: '{user_description}', filter and rank the following articles by relevance. Return only the IDs and URLs of the top 3 most relevant articles:\n\n"
     for article in articles:
         prompt += f"ID: {article.get('id', 'No ID')}\nURL: {article.get('url', 'No URL')}\nTitle: {article.get('title', 'No Title')}\n\n"
     
     response = send_chat_request(prompt)
-    logging.info(f"Filter response: {response}")
     relevant_articles = []
     for line in response.split('\n'):
         if line.startswith('ID:'):
@@ -99,18 +54,17 @@ def filter_relevant_links(articles: list, user_description: str) -> list:
                 relevant_articles.append({'id': article_id, 'url': url})
     return relevant_articles[:3]
 
-def summarize_content(content: str) -> str:
+def summarize_content(content: str, user_description: str) -> str:
     if not content.strip():
-        return "We apologize, but we couldn't find any relevant content for today's podcast. Please check back tomorrow for new updates!"
-    prompt = f"Summarize the following content into a short podcast script, focusing on the latest tech gadgets and sports news. Make sure to include specific details and keep it engaging:\n\n{content}"
+        return "We apologize, but we couldn't find any relevant content for today's podcast. Please try again with a different description of your interests!"
+    prompt = f"Summarize the following content into a short podcast script, focusing on the interests described by the user. User description: {user_description}\n\nContent to summarize:\n\n{content}"
     return send_chat_request(prompt)
 
 def generate_podcast(user_description: str):
     logging.info('GENERATING PODCAST')
     
     try:
-        email_content = process_emails()
-        queries = generate_queries(user_description, email_content)
+        queries = generate_queries(user_description)
         logging.info("Generated queries:")
         for query in queries:
             logging.info(f"- {query}")
@@ -137,13 +91,10 @@ def generate_podcast(user_description: str):
                 logging.error(f"Error crawling {article['url']}: {str(e)}")
         
         logging.info('SUMMARIZING CONTENT')
-        script = summarize_content(content)
+        script = summarize_content(content, user_description)
         
         logging.info("FINAL PODCAST SCRIPT:")
         logging.info(script)
-
-        # Wrap the script in XML tags
-        script = f"<transcript>{script}</transcript>"
 
         audio_url = text_to_speech(script)
 
@@ -154,6 +105,6 @@ def generate_podcast(user_description: str):
     except Exception as e:
         logging.error(f"Error generating podcast: {str(e)}")
         return {
-            "transcript": "<transcript>We encountered an error while generating your podcast. Please try again later.</transcript>",
+            "transcript": "We encountered an error while generating your podcast. Please try again later.",
             "audio_url": ""
         }
