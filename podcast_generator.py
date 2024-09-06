@@ -49,7 +49,7 @@ def generate_queries(user_description: str, email_content: str, num_queries: int
     queries = [query.strip() for query in response.split('\n') if query.strip()]
     return queries[:num_queries]
 
-def search_articles(query: str, num_results: int = 5):
+def search_articles(query: str, num_results: int = 10):
     logging.info(f'SEARCHING ARTICLES FOR: {query}')
     cache_key = f"{query}_{num_results}_{date.today().isoformat()}"
     
@@ -72,6 +72,8 @@ def search_articles(query: str, num_results: int = 5):
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
         results = response.json().get('results', [])
+        logging.info(f"Received {len(results)} results from Exa API")
+        logging.info(f"Sample result: {results[0] if results else 'No results'}")
         cache[cache_key] = {'results': results, 'timestamp': datetime.now()}
         return results
     except requests.RequestException as e:
@@ -81,11 +83,12 @@ def search_articles(query: str, num_results: int = 5):
 def filter_relevant_links(articles: list, user_description: str) -> list:
     if not articles:
         return []
-    prompt = f"Given the user description: '{user_description}', filter and rank the following articles by relevance. Return only the IDs and URLs of the top 3 most relevant articles:\n\n"
+    prompt = f"Given the user description: '{user_description}', who is particularly interested in tech gadgets and sports, filter and rank the following articles by relevance. Return only the IDs and URLs of the top 3 most relevant articles:\n\n"
     for article in articles:
         prompt += f"ID: {article.get('id', 'No ID')}\nURL: {article.get('url', 'No URL')}\nTitle: {article.get('title', 'No Title')}\n\n"
     
     response = send_chat_request(prompt)
+    logging.info(f"Filter response: {response}")
     relevant_articles = []
     for line in response.split('\n'):
         if line.startswith('ID:'):

@@ -11,10 +11,10 @@ def main():
     try:
         podcast = generate_podcast(user_description)
         print(f'Podcast generated successfully!')
-        print('\nTranscript:')
+        print('\nXML-wrapped Transcript:')
         print(podcast['transcript'])
-        print('\nAudio Message:')
-        print(podcast['audio_message'])
+        print('\nAudio URL:')
+        print(podcast['audio_url'])
     except Exception as e:
         print(f"Error generating podcast: {str(e)}")
 
