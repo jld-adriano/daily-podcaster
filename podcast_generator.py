@@ -4,11 +4,16 @@ from config import Config
 from web_scraper import get_website_text_content
 from anthropic_chat_completion.chat_request import send_chat_request
 
-def search_articles(query):
+def generate_queries(user_description: str, num_queries: int = 3) -> list:
+    prompt = f"Based on the following user description, generate {num_queries} search queries for finding relevant articles:\n\n{user_description}"
+    response = send_chat_request(prompt)
+    queries = [query.strip() for query in response.split('\n') if query.strip()]
+    return queries[:num_queries]
+
+def search_articles(query: str, num_results: int = 5):
     print('=' * 50)
-    print('SEARCHING ARTICLES')
+    print(f'SEARCHING ARTICLES FOR: {query}')
     print('=' * 50)
-    print(f"Searching articles for: {query}")
     url = "https://api.exa.ai/search"
     headers = {
         "accept": "application/json",
@@ -17,7 +22,7 @@ def search_articles(query):
     }
     payload = {
         "query": query,
-        "num_results": 5,
+        "num_results": num_results,
         "start_published_date": "2023-01-01"
     }
     response = requests.post(url, json=payload, headers=headers)
@@ -26,27 +31,54 @@ def search_articles(query):
     print('=' * 50)
     return response.json()['results']
 
-def summarize_content(content):
+def filter_relevant_links(articles: list, user_description: str) -> list:
+    prompt = f"Given the user description: '{user_description}', filter and rank the following articles by relevance. Return only the URLs of the top 3 most relevant articles:\n\n"
+    for article in articles:
+        prompt += f"Title: {article.get('title', 'No title')}\nURL: {article.get('url', 'No URL')}\nSnippet: {article.get('snippet', 'No snippet available')}\n\n"
+    
+    response = send_chat_request(prompt)
+    relevant_urls = [url.strip() for url in response.split('\n') if url.strip().startswith('http')]
+    return relevant_urls[:3]
+
+def summarize_content(content: str) -> str:
     prompt = f"Summarize the following content into a short podcast script:\n\n{content}"
     return send_chat_request(prompt)
 
-def generate_podcast(interests):
+def text_to_speech(text: str) -> str:
+    print('=' * 50)
+    print('AUDIO GENERATION PLACEHOLDER')
+    print('=' * 50)
+    return "Audio would be generated here in a full implementation."
+
+def generate_podcast(user_description: str):
     print('=' * 50)
     print('GENERATING PODCAST')
     print('=' * 50)
+    
+    queries = generate_queries(user_description)
+    print("Generated queries:")
+    for query in queries:
+        print(f"- {query}")
+    
+    all_articles = []
+    for query in queries:
+        articles = search_articles(query)
+        all_articles.extend(articles)
+    
+    relevant_urls = filter_relevant_links(all_articles, user_description)
+    print("\nRelevant URLs:")
+    for url in relevant_urls:
+        print(f"- {url}")
+    
     content = ""
-    for interest in interests:
-        print(f"Processing interest: {interest}")
-        articles = search_articles(interest)
-        for article in articles[:2]:  # Limit to 2 articles per interest
-            print('=' * 50)
-            print('CRAWLING ARTICLE')
-            print('=' * 50)
-            print(f"Crawling article: {article['url']}")
-            article_content = get_website_text_content(article['url'])
-            print("Full article content:")
-            print(article_content)
-            content += f"{article_content}\n\n"
+    for url in relevant_urls:
+        print('=' * 50)
+        print(f'CRAWLING ARTICLE: {url}')
+        print('=' * 50)
+        article_content = get_website_text_content(url)
+        print("Full article content:")
+        print(article_content[:500] + "...") # Print first 500 characters
+        content += f"{article_content}\n\n"
 
     print('=' * 50)
     print('SUMMARIZING CONTENT')
@@ -60,6 +92,9 @@ def generate_podcast(interests):
     print('=' * 50)
     print(script)
 
+    audio_message = text_to_speech(script)
+
     return {
-        "transcript": script
+        "transcript": script,
+        "audio_message": audio_message
     }

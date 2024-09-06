@@ -1,15 +1,14 @@
-import sys
 from podcast_generator import generate_podcast
 
+def read_user_description():
+    with open('user_description.txt', 'r') as file:
+        return file.read().strip()
+
 def main():
-    if len(sys.argv) < 2:
-        print('Usage: python cli_test.py interest1 interest2 ...')
-        sys.exit(1)
+    user_description = read_user_description()
+    print(f'Generating podcast for user description: {user_description}')
     
-    interests = sys.argv[1:]
-    print(f'Generating podcast for interests: {interests}')
-    
-    podcast = generate_podcast(interests)
+    podcast = generate_podcast(user_description)
     print(f'Podcast generated successfully!')
     print('Transcript:')
     print(podcast['transcript'])

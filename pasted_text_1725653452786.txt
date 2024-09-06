@@ -1,0 +1,26 @@
+s/', 'publishedDate': '2023-01-17T00:00:00.000Z', 'author': 'Gaby Keiderling; Lauren Harano; Maverick Li'}, {'score': 0.16734956204891205, 'title': '10 tech gift ideas for every person in your life in 2023', 'id': 'https://www.washingtonpost.com/style/interactive/2023/best-tech-gift-ideas/', 'url': 'https://www.washingtonpost.com/style/interactive/2023/best-tech-gift-ideas/', 'publishedDate': '2023-12-04T00:00:00.000Z', 'author': 'Chris Velazco'}], 'requestId': '13f894af8adb00684b3a2da49d4382b9'}
+==================================================
+==================================================
+SEARCHING ARTICLES FOR: 2. latest wearable technology for athletes
+==================================================
+Full Exa API response:
+{'results': [{'score': 0.19727221131324768, 'title': 'Sports Performance Tracking | GPS Tracking for Contact Sports | SPT', 'id': 'https://sportsperformancetracking.com/', 'url': 'https://sportsperformancetracking.com/', 'publishedDate': '2023-01-01T00:00:00.000Z', 'author': 'Coach; FC Tössfeld'}, {'score': 0.1939980685710907, 'title': 'Spectral | Reinventing Clothing To Expand Your Potential', 'id': 'https://www.spectral.fit/', 'url': 'https://www.spectral.fit/', 'publishedDate': '2023-01-01T00:00:00.000Z', 'author': None}, {'score': 0.1917952299118042, 'title': 'Core Impact', 'id': 'https://coreimpactinc.com/', 'url': 'https://coreimpactinc.com/', 'publishedDate': '2023-01-01T00:00:00.000Z', 'author': None}, {'score': 0.189869686961174, 'title': 'Hexoskin Smart Shirts - Cardiac, Respiratory, Sleep & Activity Metrics', 'id': 'https://www.hexoskin.com/', 'url': 'https://www.hexoskin.com/', 'publishedDate': '2023-01-01T00:00:00.000Z', 'author': None}, {'score': 0.1876019835472107, 'title': 'Three wearable that could impact the world of sport - Sportsmith', 'id': 'https://www.sportsmith.co/articles/the-next-big-thing-three-new-wearable-features-that-could-impact-the-world-of-sports-performance/', 'url': 'https://www.sportsmith.co/articles/the-next-big-thing-three-new-wearable-features-that-could-impact-the-world-of-sports-performance/', 'publishedDate': '2023-03-21T00:00:00.000Z', 'author': None}], 'requestId': '183b7fbc086abb16e46a33e85f209566'}
+==================================================
+
+Relevant URLs:
+==================================================
+SUMMARIZING CONTENT
+==================================================
+Full summarized content:
+ Unfortunately I do not have access to any content to summarize. As an AI assistant without access to additional context, I cannot generate a podcast script summary. Please provide the specific content you would like me to summarize and I'm happy to try my best to condense it into a short podcast script format. Let me know if you need any clarification or have additional questions!
+==================================================
+FINAL PODCAST SCRIPT
+==================================================
+ Unfortunately I do not have access to any content to summarize. As an AI assistant without access to additional context, I cannot generate a podcast script summary. Please provide the specific content you would like me to summarize and I'm happy to try my best to condense it into a short podcast script format. Let me know if you need any clarification or have additional questions!
+==================================================
+AUDIO GENERATION PLACEHOLDER
+==================================================
+Podcast generated successfully!
+Transcript:
+ Unfortunately I do not have access to any content to summarize. As an AI assistant without access to additional context, I cannot generate a podcast script summary. Please provide the specific content you would like me to summarize and I'm happy to try my best to condense it into a short podcast script format. Let me know if you need any clarification or have additional questions!
+ Environment updated. Reloading shell...

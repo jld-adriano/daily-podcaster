@@ -501,6 +501,25 @@ files = [
 ]
 
 [[package]]
+name = "elevenlabs"
+version = "1.7.0"
+description = ""
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "elevenlabs-1.7.0-py3-none-any.whl", hash = "sha256:fbdde75ba0a9d904427f7c14297dd6a2c4f64ae1d34ea3a08c022cdac5be6688"},
+    {file = "elevenlabs-1.7.0.tar.gz", hash = "sha256:42ca044778d7f0bfd23da82c9a32d539877118e6ba2e4f89343b6f41bbc3516a"},
+]
+
+[package.dependencies]
+httpx = ">=0.21.2"
+pydantic = ">=1.9.2"
+pydantic-core = ">=2.18.2,<3.0.0"
+requests = ">=2.20"
+typing_extensions = ">=4.0.0"
+websockets = ">=11.0"
+
+[[package]]
 name = "filelock"
 version = "3.15.4"
 description = "A platform independent file lock."
@@ -3323,4 +3342,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4f924f1b9648445a8062f1626b739db494767e35c1a030b946cc4c37da3c8be5"
+content-hash = "ce0a9c3173acbb9791dbd324066050f919ff79f6e300a7d4a46821e1d1d842de"
