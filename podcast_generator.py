@@ -1,10 +1,14 @@
 import os
 import requests
-from datetime import date
+from datetime import date, datetime, timedelta
 from email import message_from_file
 from config import Config
 from web_scraper import get_website_text_content
 from anthropic_chat_completion.chat_request import send_chat_request
+
+# Simple cache to store API responses
+cache = {}
+CACHE_EXPIRY = timedelta(hours=1)
 
 def process_emails():
     email_folder = 'emails'
@@ -41,6 +45,12 @@ def generate_queries(user_description: str, email_content: str, num_queries: int
 
 def search_articles(query: str, num_results: int = 5):
     print(f'SEARCHING ARTICLES FOR: {query}')
+    cache_key = f"{query}_{num_results}_{date.today().isoformat()}"
+    
+    if cache_key in cache and datetime.now() - cache[cache_key]['timestamp'] < CACHE_EXPIRY:
+        print("Using cached results")
+        return cache[cache_key]['results']
+    
     url = "https://api.exa.ai/search"
     headers = {
         "accept": "application/json",
@@ -55,7 +65,9 @@ def search_articles(query: str, num_results: int = 5):
     try:
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
-        return response.json().get('results', [])
+        results = response.json().get('results', [])
+        cache[cache_key] = {'results': results, 'timestamp': datetime.now()}
+        return results
     except requests.RequestException as e:
         print(f"Error searching articles: {str(e)}")
         return []
@@ -91,42 +103,49 @@ def text_to_speech(text: str) -> str:
 def generate_podcast(user_description: str):
     print('GENERATING PODCAST')
     
-    email_content = process_emails()
-    queries = generate_queries(user_description, email_content)
-    print("Generated queries:")
-    for query in queries:
-        print(f"- {query}")
-    
-    all_articles = []
-    for query in queries:
-        articles = search_articles(query)
-        all_articles.extend(articles)
-    
-    relevant_articles = filter_relevant_links(all_articles, user_description)
-    print("\nRelevant articles:")
-    for article in relevant_articles:
-        print(f"- ID: {article['id']}")
-        print(f"  URL: {article['url']}")
-    
-    content = ""
-    for article in relevant_articles:
-        print(f'CRAWLING ARTICLE: {article["url"]}')
-        try:
-            article_content = get_website_text_content(article['url'])
-            print(f"Article content preview: {article_content[:200]}...")
-            content += f"{article_content}\n\n"
-        except Exception as e:
-            print(f"Error crawling {article['url']}: {str(e)}")
+    try:
+        email_content = process_emails()
+        queries = generate_queries(user_description, email_content)
+        print("Generated queries:")
+        for query in queries:
+            print(f"- {query}")
+        
+        all_articles = []
+        for query in queries:
+            articles = search_articles(query)
+            all_articles.extend(articles)
+        
+        relevant_articles = filter_relevant_links(all_articles, user_description)
+        print("\nRelevant articles:")
+        for article in relevant_articles:
+            print(f"- ID: {article['id']}")
+            print(f"  URL: {article['url']}")
+        
+        content = ""
+        for article in relevant_articles:
+            print(f'CRAWLING ARTICLE: {article["url"]}')
+            try:
+                article_content = get_website_text_content(article['url'])
+                print(f"Article content preview: {article_content[:200]}...")
+                content += f"{article_content}\n\n"
+            except Exception as e:
+                print(f"Error crawling {article['url']}: {str(e)}")
+        
+        print('SUMMARIZING CONTENT')
+        script = summarize_content(content)
+        
+        print("FINAL PODCAST SCRIPT:")
+        print(script)
 
-    print('SUMMARIZING CONTENT')
-    script = summarize_content(content)
-    
-    print("FINAL PODCAST SCRIPT:")
-    print(script)
+        audio_message = text_to_speech(script)
 
-    audio_message = text_to_speech(script)
-
-    return {
-        "transcript": script,
-        "audio_message": audio_message
-    }
+        return {
+            "transcript": script,
+            "audio_message": audio_message
+        }
+    except Exception as e:
+        print(f"Error generating podcast: {str(e)}")
+        return {
+            "transcript": "We encountered an error while generating your podcast. Please try again later.",
+            "audio_message": "Error generating audio."
+        }
