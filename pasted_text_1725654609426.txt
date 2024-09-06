@@ -1,0 +1,30 @@
+Generating podcast for user description: A tech-savvy sports enthusiast who loves staying up-to-date with the latest gadgets and follows major league sports.
+2024-09-06 20:29:38,903 - INFO - GENERATING PODCAST
+2024-09-06 20:29:38,903 - INFO - Successfully processed email: sample.eml
+2024-09-06 20:29:38,904 - INFO - Processed 1 emails. Content preview: Subject: Latest Tech Gadgets for Sports Enthusiasts
+Body: Dear Sports Tech Enthusiast,
+
+I hope this ...
+2024-09-06 20:29:40,882 - INFO - HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+2024-09-06 20:29:40,883 - INFO - Generated queries:
+2024-09-06 20:29:40,883 - INFO - - Here are 3 search queries based on the user description and email content:
+2024-09-06 20:29:40,883 - INFO - - 1. new sports gadgets for fans
+2024-09-06 20:29:40,883 - INFO - - 2. smart baseball sensors track performance
+2024-09-06 20:29:40,883 - INFO - SEARCHING ARTICLES FOR: Here are 3 search queries based on the user description and email content:
+2024-09-06 20:29:41,364 - INFO - SEARCHING ARTICLES FOR: 1. new sports gadgets for fans
+2024-09-06 20:29:41,829 - INFO - SEARCHING ARTICLES FOR: 2. smart baseball sensors track performance
+2024-09-06 20:29:49,822 - INFO - HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+2024-09-06 20:29:49,822 - INFO - 
+Relevant articles:
+2024-09-06 20:29:49,823 - INFO - SUMMARIZING CONTENT
+2024-09-06 20:29:49,823 - INFO - FINAL PODCAST SCRIPT:
+2024-09-06 20:29:49,823 - INFO - We apologize, but we couldn't find any relevant content for today's podcast. Please check back tomorrow for new updates!
+2024-09-06 20:29:49,861 - ERROR - Error generating audio: 401 Client Error: Unauthorized for url: https://api.elevenlabs.io/v1/text-to-speech/default_voice_id_here
+Podcast generated successfully!
+
+Transcript:
+<transcript>We apologize, but we couldn't find any relevant content for today's podcast. Please check back tomorrow for new updates!</transcript>
+
+Audio Message:
+Error generating podcast: 'audio_message'
+~/DailyPodCaster$ 

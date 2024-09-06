@@ -1,10 +1,16 @@
 import os
 import requests
+import logging
+import time
 from datetime import date, datetime, timedelta
 from email import message_from_file
 from config import Config
 from web_scraper import get_website_text_content
 from anthropic_chat_completion.chat_request import send_chat_request
+from text_to_speech import text_to_speech
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Simple cache to store API responses
 cache = {}
@@ -14,7 +20,7 @@ def process_emails():
     email_folder = 'emails'
     email_content = []
     if not os.path.exists(email_folder):
-        print(f"Warning: {email_folder} directory not found.")
+        logging.warning(f"{email_folder} directory not found.")
         return ""
     
     for filename in os.listdir(email_folder):
@@ -25,16 +31,16 @@ def process_emails():
                     subject = email['subject']
                     body = email.get_payload()
                     email_content.append(f"Subject: {subject}\nBody: {body}")
-                    print(f"Successfully processed email: {filename}")
+                    logging.info(f"Successfully processed email: {filename}")
             except Exception as e:
-                print(f"Error processing email {filename}: {str(e)}")
+                logging.error(f"Error processing email {filename}: {str(e)}")
     
     if not email_content:
-        print("No valid emails found in the directory.")
+        logging.warning("No valid emails found in the directory.")
         return ""
     
     combined_content = '\n\n'.join(email_content)
-    print(f"Processed {len(email_content)} emails. Content preview: {combined_content[:100]}...")
+    logging.info(f"Processed {len(email_content)} emails. Content preview: {combined_content[:100]}...")
     return combined_content
 
 def generate_queries(user_description: str, email_content: str, num_queries: int = 3) -> list:
@@ -44,11 +50,11 @@ def generate_queries(user_description: str, email_content: str, num_queries: int
     return queries[:num_queries]
 
 def search_articles(query: str, num_results: int = 5):
-    print(f'SEARCHING ARTICLES FOR: {query}')
+    logging.info(f'SEARCHING ARTICLES FOR: {query}')
     cache_key = f"{query}_{num_results}_{date.today().isoformat()}"
     
     if cache_key in cache and datetime.now() - cache[cache_key]['timestamp'] < CACHE_EXPIRY:
-        print("Using cached results")
+        logging.info("Using cached results")
         return cache[cache_key]['results']
     
     url = "https://api.exa.ai/search"
@@ -69,7 +75,7 @@ def search_articles(query: str, num_results: int = 5):
         cache[cache_key] = {'results': results, 'timestamp': datetime.now()}
         return results
     except requests.RequestException as e:
-        print(f"Error searching articles: {str(e)}")
+        logging.error(f"Error searching articles: {str(e)}")
         return []
 
 def filter_relevant_links(articles: list, user_description: str) -> list:
@@ -96,19 +102,15 @@ def summarize_content(content: str) -> str:
     prompt = f"Summarize the following content into a short podcast script, focusing on the latest tech gadgets and sports news. Make sure to include specific details and keep it engaging:\n\n{content}"
     return send_chat_request(prompt)
 
-def text_to_speech(text: str) -> str:
-    print('AUDIO GENERATION PLACEHOLDER')
-    return "Audio would be generated here in a full implementation."
-
 def generate_podcast(user_description: str):
-    print('GENERATING PODCAST')
+    logging.info('GENERATING PODCAST')
     
     try:
         email_content = process_emails()
         queries = generate_queries(user_description, email_content)
-        print("Generated queries:")
+        logging.info("Generated queries:")
         for query in queries:
-            print(f"- {query}")
+            logging.info(f"- {query}")
         
         all_articles = []
         for query in queries:
@@ -116,36 +118,39 @@ def generate_podcast(user_description: str):
             all_articles.extend(articles)
         
         relevant_articles = filter_relevant_links(all_articles, user_description)
-        print("\nRelevant articles:")
+        logging.info("\nRelevant articles:")
         for article in relevant_articles:
-            print(f"- ID: {article['id']}")
-            print(f"  URL: {article['url']}")
+            logging.info(f"- ID: {article['id']}")
+            logging.info(f"  URL: {article['url']}")
         
         content = ""
         for article in relevant_articles:
-            print(f'CRAWLING ARTICLE: {article["url"]}')
+            logging.info(f'CRAWLING ARTICLE: {article["url"]}')
             try:
                 article_content = get_website_text_content(article['url'])
-                print(f"Article content preview: {article_content[:200]}...")
+                logging.info(f"Article content preview: {article_content[:200]}...")
                 content += f"{article_content}\n\n"
             except Exception as e:
-                print(f"Error crawling {article['url']}: {str(e)}")
+                logging.error(f"Error crawling {article['url']}: {str(e)}")
         
-        print('SUMMARIZING CONTENT')
+        logging.info('SUMMARIZING CONTENT')
         script = summarize_content(content)
         
-        print("FINAL PODCAST SCRIPT:")
-        print(script)
+        logging.info("FINAL PODCAST SCRIPT:")
+        logging.info(script)
 
-        audio_message = text_to_speech(script)
+        # Wrap the script in XML tags
+        script = f"<transcript>{script}</transcript>"
+
+        audio_url = text_to_speech(script)
 
         return {
             "transcript": script,
-            "audio_message": audio_message
+            "audio_url": audio_url
         }
     except Exception as e:
-        print(f"Error generating podcast: {str(e)}")
+        logging.error(f"Error generating podcast: {str(e)}")
         return {
-            "transcript": "We encountered an error while generating your podcast. Please try again later.",
-            "audio_message": "Error generating audio."
+            "transcript": "<transcript>We encountered an error while generating your podcast. Please try again later.</transcript>",
+            "audio_url": ""
         }

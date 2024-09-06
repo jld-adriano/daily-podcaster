@@ -1,4 +1,5 @@
 import os
+import logging
 from flask import Flask, render_template, request, jsonify
 from models import db, User, Podcast
 from podcast_generator import generate_podcast
@@ -8,6 +9,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 db.init_app(app)
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 with app.app_context():
     db.create_all()
@@ -45,18 +49,22 @@ def create_podcast():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    podcast = generate_podcast(user.interests)
-    new_podcast = Podcast(user_id=user_id, audio_url=podcast['audio_url'], transcript=podcast['transcript'])
-    db.session.add(new_podcast)
-    db.session.commit()
+    try:
+        podcast = generate_podcast(user.interests)
+        new_podcast = Podcast(user_id=user_id, audio_url=podcast['audio_url'], transcript=podcast['transcript'])
+        db.session.add(new_podcast)
+        db.session.commit()
 
-    return jsonify({"status": "success", "podcast_id": new_podcast.id})
+        return jsonify({"status": "success", "podcast_id": new_podcast.id})
+    except Exception as e:
+        logging.error(f"Error generating podcast: {str(e)}")
+        return jsonify({"error": "Failed to generate podcast"}), 500
 
 @app.route('/api/podcasts', methods=['GET'])
 def get_podcasts():
     user_id = request.args.get('user_id', 1)  # For simplicity, we're using a default user
     podcasts = Podcast.query.filter_by(user_id=user_id).order_by(Podcast.created_at.desc()).all()
-    return jsonify([{"id": p.id, "audio_url": p.audio_url, "created_at": p.created_at} for p in podcasts])
+    return jsonify([{"id": p.id, "audio_url": p.audio_url, "created_at": p.created_at.isoformat()} for p in podcasts])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
