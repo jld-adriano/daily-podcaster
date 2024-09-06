@@ -72,7 +72,7 @@ def summarize_content(content: str, user_description: str) -> str:
     return send_chat_request(prompt)
 
 
-def generate_podcast(user_description: str):
+def generate_podcast(user_description: str, user_id: int):
     logging.info("GENERATING PODCAST")
 
     try:
@@ -110,10 +110,11 @@ def generate_podcast(user_description: str):
 
         audio_url = text_to_speech(script)
 
-        return {"transcript": script, "audio_url": audio_url}
+        return {"transcript": script, "audio_url": audio_url, "user_id": user_id}
     except Exception as e:
         logging.error(f"Error generating podcast: {str(e)}")
         return {
             "transcript": "We encountered an error while generating your podcast. Please try again later.",
             "audio_url": "",
+            "user_id": user_id,
         }
