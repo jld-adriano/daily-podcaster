@@ -29,9 +29,11 @@ def search_articles(query: str, num_results: int = 5):
     print("Full Exa API response:")
     print(response.json())
     print('=' * 50)
-    return response.json()['results']
+    return response.json().get('results', [])
 
 def filter_relevant_links(articles: list, user_description: str) -> list:
+    if not articles:
+        return []
     prompt = f"Given the user description: '{user_description}', filter and rank the following articles by relevance. Return only the URLs of the top 3 most relevant articles:\n\n"
     for article in articles:
         prompt += f"Title: {article.get('title', 'No title')}\nURL: {article.get('url', 'No URL')}\nSnippet: {article.get('snippet', 'No snippet available')}\n\n"
@@ -41,6 +43,8 @@ def filter_relevant_links(articles: list, user_description: str) -> list:
     return relevant_urls[:3]
 
 def summarize_content(content: str) -> str:
+    if not content.strip():
+        return "We apologize, but we couldn't find any relevant content for today's podcast. Please check back tomorrow for new updates!"
     prompt = f"Summarize the following content into a short podcast script:\n\n{content}"
     return send_chat_request(prompt)
 
@@ -75,10 +79,13 @@ def generate_podcast(user_description: str):
         print('=' * 50)
         print(f'CRAWLING ARTICLE: {url}')
         print('=' * 50)
-        article_content = get_website_text_content(url)
-        print("Full article content:")
-        print(article_content[:500] + "...") # Print first 500 characters
-        content += f"{article_content}\n\n"
+        try:
+            article_content = get_website_text_content(url)
+            print("Full article content:")
+            print(article_content[:500] + "...") # Print first 500 characters
+            content += f"{article_content}\n\n"
+        except Exception as e:
+            print(f"Error crawling {url}: {str(e)}")
 
     print('=' * 50)
     print('SUMMARIZING CONTENT')

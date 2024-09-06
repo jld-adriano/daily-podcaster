@@ -8,10 +8,15 @@ def main():
     user_description = read_user_description()
     print(f'Generating podcast for user description: {user_description}')
     
-    podcast = generate_podcast(user_description)
-    print(f'Podcast generated successfully!')
-    print('Transcript:')
-    print(podcast['transcript'])
+    try:
+        podcast = generate_podcast(user_description)
+        print(f'Podcast generated successfully!')
+        print('Transcript:')
+        print(podcast['transcript'])
+        print('\nAudio Message:')
+        print(podcast['audio_message'])
+    except Exception as e:
+        print(f"Error generating podcast: {str(e)}")
 
 if __name__ == '__main__':
     main()
