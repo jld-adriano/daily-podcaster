@@ -21,6 +21,7 @@ sqlalchemy = "^2.0.34"
 elevenlabs = "^1.7.0"
 werkzeug = "^3.0.4"
 flask-login = "^0.6.3"
+flask-cors = "^5.0.0"
 
 
 [build-system]

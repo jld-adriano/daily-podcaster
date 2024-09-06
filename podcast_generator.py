@@ -13,6 +13,51 @@ logging.basicConfig(
 )
 
 
+def generate_podcast_stream(user_description: str, user_id: int):
+    logging.info("GENERATING PODCAST")
+
+    try:
+        # Step 1: Generate queries
+        queries = generate_queries(user_description)
+        yield {"step": "queries", "data": queries}
+
+        # Step 2: Search articles
+        all_articles = []
+        for query in queries:
+            articles = search_articles(query)
+            all_articles.extend(articles)
+        yield {"step": "articles", "data": all_articles}
+
+        # Step 3: Filter relevant links
+        relevant_articles = filter_relevant_links(all_articles, user_description)
+        yield {"step": "relevant_articles", "data": relevant_articles}
+
+        # Step 4: Crawl and collect content
+        content = ""
+        for article in relevant_articles:
+            try:
+                article_content = get_website_text_content(article["url"])
+                content += f"{article_content}\n\n"
+            except Exception as e:
+                logging.error(f"Error crawling {article['url']}: {str(e)}")
+        yield {"step": "content", "data": content[:200] + "..."}  # Preview of content
+
+        # Step 5: Summarize content
+        script = summarize_content(content, user_description)
+        yield {"step": "script", "data": script}
+
+        # Step 6: Generate audio
+        audio_url = text_to_speech(script)
+        yield {"step": "audio", "data": audio_url}
+
+    except Exception as e:
+        logging.error(f"Error generating podcast: {str(e)}")
+        yield {
+            "step": "error",
+            "data": "We encountered an error while generating your podcast. Please try again later.",
+        }
+
+
 def generate_queries(user_description: str, num_queries: int = 3) -> list:
     prompt = f"Based on the following user description, generate {num_queries} search queries for finding relevant articles:\n\nUser description: {user_description}"
     response = send_chat_request(prompt)

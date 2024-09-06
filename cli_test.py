@@ -1,4 +1,4 @@
-from podcast_generator import generate_podcast
+from podcast_generator import generate_podcast_stream
 
 
 def read_user_description():
@@ -11,17 +11,16 @@ def main():
     print(f"Generating podcast for user description: {user_description}")
 
     try:
-        podcast = generate_podcast(user_description)
+        for step in generate_podcast_stream(user_description, "fake_user_id"):
+            print(f"Step: {step['step']}")
+            print(f"Data: {step['data']}")
+            print("---")
+
         print("Podcast generated successfully!")
-        print("\nXML-wrapped Transcript:")
-        print(podcast["transcript"])
-        print("\nAudio URL:")
-        print(podcast["audio_url"])
     except Exception as e:
         print(f"Error generating podcast: {str(e)}")
         print(e)
 
 
 if __name__ == "__main__":
-    main()
     main()
